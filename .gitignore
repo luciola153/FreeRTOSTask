@@ -3,6 +3,7 @@
 
 # CMake generated user-local presets
 /CMakeUserPresets.json
+/compile_commands.json
 
 # IDE local metadata
 /.idea/
