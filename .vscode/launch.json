@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Build (only compile)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Build (CMake preset Debug, parallel 10)",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": [
+        "/d",
+        "/c",
+        "echo Build finished."
+      ]
+    },
+    {
+      "name": "Run (build + flash, no debug)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Build + Flash",
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": [
+        "/d",
+        "/c",
+        "echo Build and flash finished."
+      ]
+    },
+    {
+      "name": "Debug (OpenOCD)",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/Debug/LED01.elf",
+      "runToEntryPoint": "main",
+      "serverpath": "${config:embedded.openocdPath}",
+      "gdbPath": "${config:embedded.gdbPath}",
+      "configFiles": [
+        "${config:embedded.openocdConfig}"
+      ],
+      "device": "STM32F407xx",
+      "openOCDLaunchCommands": [
+        "init",
+        "reset halt"
+      ],
+      "postLaunchCommands": [
+        "monitor reset halt"
+      ],
+      "preLaunchTask": "Build (CMake preset Debug, parallel 10)"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# Build output
+/build/
+
+# CMake generated user-local presets
+/CMakeUserPresets.json
+
+# IDE local metadata
+/.idea/
+/.lingma/
+
+# OS/editor temp files
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

@@ -1,0 +1,52 @@
+{
+  "version": "2.0.0",
+  "options": {
+    "cwd": "${workspaceFolder}",
+    "shell": {
+      "executable": "cmd.exe",
+      "args": [
+        "/d",
+        "/c"
+      ]
+    }
+  },
+  "tasks": [
+    {
+      "label": "Build (CMake preset Debug, parallel 10)",
+      "type": "shell",
+      "command": "cmake --fresh --preset Debug && cmake --build --preset Debug --parallel 10",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "Flash (OpenOCD + DAPLink)",
+      "type": "shell",
+      "command": "${config:embedded.openocdPath}",
+      "args": [
+        "-f",
+        "${config:embedded.openocdConfig}",
+        "-c",
+        "init",
+        "-c",
+        "reset halt",
+        "-c",
+        "program ${workspaceFolder}/build/Debug/LED01.elf verify reset exit"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Build + Flash",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Build (CMake preset Debug, parallel 10)",
+        "Flash (OpenOCD + DAPLink)"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}
