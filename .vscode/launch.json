@@ -19,7 +19,7 @@
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "preLaunchTask": "Build + Flash",
+      "preLaunchTask": "Flash (OpenOCD + DAPLink)",
       "runtimeExecutable": "cmd.exe",
       "runtimeArgs": [
         "/d",

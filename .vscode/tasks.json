@@ -14,7 +14,7 @@
     {
       "label": "Build (CMake preset Debug, parallel 10)",
       "type": "shell",
-      "command": "cmake --fresh --preset Debug && cmake --build --preset Debug --parallel 10",
+      "command": "cmake --build --preset Debug --parallel 10",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -35,7 +35,7 @@
         "-c",
         "reset halt",
         "-c",
-        "program ${workspaceFolder}/build/Debug/LED01.elf verify reset exit"
+        "program build/Debug/LED01.elf verify reset exit"
       ],
       "problemMatcher": []
     },
