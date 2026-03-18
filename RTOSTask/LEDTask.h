@@ -5,6 +5,6 @@
 #ifndef LED01_LEDTASK_H
 #define LED01_LEDTASK_H
 
-
+void StartLEDTask(void *argument);
 
 #endif //LED01_LEDTASK_H

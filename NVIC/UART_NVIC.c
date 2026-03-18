@@ -1,9 +1,11 @@
 #include "UART_NVIC.h"
 #include "usart.h"
 #include "cmsis_os2.h"
+#include "TlyTask.h"
 
 // 全局变量：每个串口的状态机
 Serial_RxPacket RXdata[UART_NUM_MAX];
+static uint16_t s_uart2_expected_len = 0;
 
 /**
  * @brief 获取串口对应的帧头
@@ -52,6 +54,9 @@ void UART_ResetStateMachine(uint8_t uart_id)
     RXdata[uart_id].number_final = 0;
     RXdata[uart_id].rx_final_flag = 0;
     RXdata[uart_id].last_byte_time = 0;
+    if (uart_id == 2) {
+        s_uart2_expected_len = 0;
+    }
     taskEXIT_CRITICAL();
 }
 
@@ -106,6 +111,54 @@ void UART_ProcessByte(uint8_t uart_id, uint8_t data)
             // 重置后重新处理当前字节？理论上应该丢弃，但为了简单，直接返回
             // 注意：重置后 number=0，所以下面的状态机会重新开始
         }
+    }
+
+    // 特殊处理：串口 2（Modbus RTU, 0x50 0x03, 第 3 字节是 byte count）
+    if (uart_id == 2)
+    {
+        if (RXdata[uart_id].number == 0)
+        {
+            if (data == 0x50)
+            {
+                RXdata[uart_id].Rx[0] = data;
+                RXdata[uart_id].number = 1;
+                s_uart2_expected_len = 0;
+            }
+            return;
+        }
+
+        if (RXdata[uart_id].number >= MAX_FRAME_LENGTH)
+        {
+            UART_ResetStateMachine(uart_id);
+            return;
+        }
+
+        RXdata[uart_id].Rx[RXdata[uart_id].number++] = data;
+
+        if (RXdata[uart_id].number == 2 && RXdata[uart_id].Rx[1] != 0x03)
+        {
+            UART_ResetStateMachine(uart_id);
+            return;
+        }
+
+        if (RXdata[uart_id].number == 3)
+        {
+            s_uart2_expected_len = (uint16_t)RXdata[uart_id].Rx[2] + 5U;
+            if (s_uart2_expected_len < 5U || s_uart2_expected_len > MAX_FRAME_LENGTH)
+            {
+                UART_ResetStateMachine(uart_id);
+                return;
+            }
+        }
+
+        if (s_uart2_expected_len > 0U && RXdata[uart_id].number >= s_uart2_expected_len)
+        {
+            RXdata[uart_id].number_final = RXdata[uart_id].number;
+            RXdata[uart_id].number = 0;
+            RXdata[uart_id].rx_final_flag = 1;
+            s_uart2_expected_len = 0;
+        }
+        return;
     }
 
     // 特殊处理：串口 5（只有帧尾，无帧头）
@@ -326,9 +379,18 @@ void StartCommandTask(void *argument)
                         }
                         break;
 
-                    case 2:  // 串口 2 - 数据回显
-                        UART_SendData(&huart2, temp_frame, temp_len);
+                    case 2:  // 串口 2 - 陀螺仪 Modbus 数据转发给 TlyTask
+                    {
+                        TlyMessage msg;
+                        if (temp_len > TLY_RAW_FRAME_MAX_LEN) {
+                            break;
+                        }
+                        memset(&msg, 0, sizeof(msg));
+                        msg.raw_len = temp_len;
+                        memcpy(msg.raw, temp_frame, temp_len);
+                        osMessageQueuePut(TlyQueueHandle, &msg, 0, 0);
                         break;
+                    }
 
                     case 3:  // 串口 3 - 数据回显
                         UART_SendData(&huart3, temp_frame, temp_len);

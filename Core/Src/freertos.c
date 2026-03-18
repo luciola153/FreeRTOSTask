@@ -26,8 +26,12 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "system.h"
+#include "KeyTask.h"
+#include "LEDTask.h"
 #include "LEDtype.h"
 #include "OLEDTask.h"
+#include "TlyTask.h"
+#include "DeepSensorTask.h"
 #include "UART_NVIC.h"  // 包含 Serial_RxPacket 定义
 /* USER CODE END Includes */
 
@@ -75,8 +79,22 @@ const osThreadAttr_t CommandTask_attributes = {
 osThreadId_t OLEDTaskHandle;
 const osThreadAttr_t OLEDTask_attributes = {
   .name = "OLEDTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for TlyTask */
+osThreadId_t TlyTaskHandle;
+const osThreadAttr_t TlyTask_attributes = {
+  .name = "TlyTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal1,
+};
+/* Definitions for DeepSensorTask */
+osThreadId_t DeepSensorTaskHandle;
+const osThreadAttr_t DeepSensorTask_attributes = {
+  .name = "DeepSensorTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for LEDQueue */
 osMessageQueueId_t LEDQueueHandle;
@@ -93,6 +111,16 @@ osMessageQueueId_t OLEDQueueHandle;
 const osMessageQueueAttr_t OLEDQueue_attributes = {
   .name = "OLEDQueue"
 };
+/* Definitions for TlyQueue */
+osMessageQueueId_t TlyQueueHandle;
+const osMessageQueueAttr_t TlyQueue_attributes = {
+  .name = "TlyQueue"
+};
+/* Definitions for DeepSensorQueue */
+osMessageQueueId_t DeepSensorQueueHandle;
+const osMessageQueueAttr_t DeepSensorQueue_attributes = {
+  .name = "DeepSensorQueue"
+};
 /* Definitions for KeySemaphore */
 osSemaphoreId_t KeySemaphoreHandle;
 const osSemaphoreAttr_t KeySemaphore_attributes = {
@@ -108,6 +136,8 @@ void StartKeyTask(void *argument);
 extern void StartLEDTask(void *argument);
 extern void StartCommandTask(void *argument);
 extern void StartOLEDTask(void *argument);
+extern void StartTlyTask(void *argument);
+extern void StartDeepSensorTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -147,6 +177,12 @@ void MX_FREERTOS_Init(void) {
   /* creation of OLEDQueue */
   OLEDQueueHandle = osMessageQueueNew (16, sizeof(OLEDMessage*), &OLEDQueue_attributes);
 
+  /* creation of TlyQueue */
+  TlyQueueHandle = osMessageQueueNew (16, sizeof(TlyMessage), &TlyQueue_attributes);
+
+  /* creation of DeepSensorQueue */
+  DeepSensorQueueHandle = osMessageQueueNew (16, sizeof(DeepSensorMessage), &DeepSensorQueue_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -163,6 +199,12 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of OLEDTask */
   OLEDTaskHandle = osThreadNew(StartOLEDTask, NULL, &OLEDTask_attributes);
+
+  /* creation of TlyTask */
+  TlyTaskHandle = osThreadNew(StartTlyTask, NULL, &TlyTask_attributes);
+
+  /* creation of DeepSensorTask */
+  DeepSensorTaskHandle = osThreadNew(StartDeepSensorTask, NULL, &DeepSensorTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

@@ -64,10 +64,13 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         hardware/OLED.c
         hardware/OLED_Data.c
         NVIC/UART_NVIC.c
+        NVIC/uart_execute.c
         NVIC/EXTI.c
         RTOSTask/LEDTask.c
         RTOSTask/KeyTask.c
         RTOSTask/OLEDTask.c
+        RTOSTask/TlyTask.c
+        RTOSTask/DeepSensorTask.c
 )
 
 # Add include paths

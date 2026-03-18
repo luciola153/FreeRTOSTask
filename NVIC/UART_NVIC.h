@@ -25,7 +25,7 @@
 #define SENSOR6_FIXED_LENGTH  10  // 例如：1 字节帧头 + 9 字节数据 = 10 字节
 
 // 最大帧长度（防止缓冲区溢出）
-#define MAX_FRAME_LENGTH 64
+#define MAX_FRAME_LENGTH 128
 
 // 超时时间（ms）- 用于帧超时检测，建议根据实际波特率调整
 #define FRAME_TIMEOUT_MS 50

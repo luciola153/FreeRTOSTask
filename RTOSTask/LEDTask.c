@@ -1,5 +1,6 @@
 #include "cmsis_os2.h"
 #include "system.h"
+#include "LEDTask.h"
 
 void StartLEDTask(void *argument) {
     for (;;) {

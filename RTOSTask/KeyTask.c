@@ -1,6 +1,7 @@
 
 #include "cmsis_os2.h"
 #include "system.h"
+#include "KeyTask.h"
 #include "OLEDTask.h"  // 包含 OLED 消息结构定义
 
 
@@ -45,7 +46,7 @@ void StartKeyTask(void *argument) {
             keyPressCount++;
             OLEDMessage* oledMsg = pvPortMalloc(sizeof(OLEDMessage));
             oledMsg->x = 0;
-            oledMsg->y = 16;
+            oledMsg->y = 56;
             oledMsg->fontSize = OLED_6X8;
             
             // 动态分配文本内存（每个消息独立）
